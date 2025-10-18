@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astuces Minceurs - Système Automatique</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 40px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 1.2em; opacity: 0.9; margin-bottom: 5px; }
+        .author { font-style: italic; margin-top: 10px; opacity: 0.8; }
+        .controls { padding: 30px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .btn { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4); }
+        .btn:active { transform: translateY(0); }
+        .btn-secondary { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3); }
+        .btn-secondary:hover { box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4); }
+        .btn-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); }
+        .btn-danger:hover { box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4); }
+        .status-container { padding: 20px; margin: 20px; border-radius: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 5px solid #2196F3; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .status-title { font-size: 1.3em; font-weight: 600; margin-bottom: 10px; color: #1976d2; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2em; font-weight: 700; color: #4CAF50; }
+        .stat-label { font-size: 0.9em; color: #666; margin-top: 5px; }
+        .articles-section { padding: 0 30px 30px; }
+        .section-title { font-size: 1.8em; margin-bottom: 20px; color: #2c5530; text-align: center; font-weight: 600; }
+        .articles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .article-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 1px solid #e9ecef; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .article-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .article-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
+        .article-image { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef; }
+        .article-title { font-size: 1.3em; font-weight: 600; margin-bottom: 12px; color: #2c5530; line-height: 1.4; }
+        .article-meta { color: #666; font-size: 0.9em; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .article-date { font-style: italic; }
+        .published { color: #4CAF50; font-weight: 600; background: #e8f5e8; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
+        .pending { color: #ff9800; font-weight: 600; background: #fff3e0; padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
+        .article-link { display: inline-block; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; text-align: center; width: 100%; margin-top: 10px; }
+        .article-link:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); }
+        .loading { text-align: center; padding: 60px 20px; color: #666; font-size: 1.1em; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error-message { background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid #f44336; }
+        .success-message { background: #e8f5e8; color: #2e7d32; padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+        .empty-state-icon { font-size: 4em; margin-bottom: 20px; opacity: 0.5; }
+        .api-status { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; justify-content: center; }
+        .api-status-item { background: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9em; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .status-online { color: #4CAF50; font-weight: 600; }
+        .status-offline { color: #f44336; font-weight: 600; }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .controls { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 300px; }
+            .articles-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Astuces Minceurs Automatique</h1>
+            <p>Système de génération automatique d'articles sur la perte de poids</p>
+            <p class="author">Développé par MATCHAMBOU Messowè Maxime</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="generateArticle()">🚀 Générer un Article Maintenant</button>
+            <button class="btn btn-secondary" onclick="loadArticles()">📊 Actualiser la Liste</button>
+            <button class="btn btn-secondary" onclick="checkSystemStatus()">🔍 Vérifier le Statut</button>
+            <button class="btn btn-danger" onclick="clearMessages()">🗑️ Effacer les Messages</button>
+        </div>
+        
+        <div class="status-container">
+            <div class="status-title">📈 Statut du Système</div>
+            <div id="statusMessage">💡 Système actif - Prochaine génération automatique dans 4 heures</div>
+            
+            <div class="stats" id="systemStats">
+                <div class="stat-card"><div class="stat-number" id="totalArticles">0</div><div class="stat-label">Articles Totaux</div></div>
+                <div class="stat-card"><div class="stat-number" id="publishedArticles">0</div><div class="stat-label">Articles Publiés</div></div>
+                <div class="stat-card"><div class="stat-number" id="pendingArticles">0</div><div class="stat-label">En Attente</div></div>
+                <div class="stat-card"><div class="stat-number" id="lastActivity">--</div><div class="stat-label">Dernière Activité</div></div>
+            </div>
+            
+            <div class="api-status" id="apiStatus"></div>
+        </div>
+        
+        <div id="messagesContainer"></div>
+        
+        <div class="articles-section">
+            <h2 class="section-title">📝 Articles Générés</h2>
+            <div class="articles-grid" id="articlesGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    Chargement des articles...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let articles = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticles();
+            checkSystemStatus();
+        });
+        
+        async function generateArticle() {
+            showMessage('🔄 Début de la génération d\'article...', 'info');
+            
+            const generateBtn = document.querySelector('.btn');
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '⏳ Génération en cours...';
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/generate-article', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(`✅ Article généré avec succès: "${result.article}"`, 'success');
+                    if (result.url && !result.url.includes('blog-exemple.com')) {
+                        showMessage(`🔗 <a href="${result.url}" target="_blank" style="color: white; text-decoration: underline;">Voir l'article publié</a>`, 'success');
+                    }
+                } else {
+                    showMessage(`❌ Erreur lors de la génération: ${result.error}`, 'error');
+                }
+                
+                await loadArticles();
+                await checkSystemStatus();
+                
+            } catch (error) {
+                showMessage(`❌ Erreur de connexion: ${error.message}`, 'error');
+                console.error('Erreur:', error);
+            } finally {
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        async function loadArticles() {
+            const grid = document.getElementById('articlesGrid');
+            grid.innerHTML = `<div class="loading"><div class="loading-spinner"></div>Chargement des articles...</div>`;
+            
+            try {
+                const response = await fetch('/api/articles');
+                articles = await response.json();
+                
+                if (articles.length === 0) {
+                    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><h3>Aucun article généré pour le moment</h3><p>Cliquez sur "Générer un Article" pour commencer</p></div>`;
+                    return;
+                }
+                
+                articles.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                grid.innerHTML = articles.map(article => `
+                    <div class="article-card">
+                        ${article.imageUrl ? `<img src="${article.imageUrl}" alt="${article.title}" class="article-image" onerror="this.src='https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=200&fit=crop'">` : ''}
+                        <div class="article-title">${escapeHtml(article.title)}</div>
+                        <div class="article-meta">
+                            <span class="article-date">${formatDate(article.createdAt)}</span>
+                            <span class="${article.published ? 'published' : 'pending'}">${article.published ? '✅ Publié' : '⏳ En attente'}</span>
+                        </div>
+                        ${article.publishedUrl && article.publishedUrl.includes('blogger.com') ? `<a href="${article.publishedUrl}" target="_blank" class="article-link">📖 Lire l'article</a>` : ''}
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                grid.innerHTML = `<div class="error-message">❌ Erreur de chargement: ${error.message}</div>`;
+            }
+        }
+        
+        async function checkSystemStatus() {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.innerHTML = '🔍 Vérification du statut en cours...';
+            
+            try {
+                const healthResponse = await fetch('/health');
+                await healthResponse.json();
+                updateStatistics();
+                await checkAPIStatus();
+                statusElement.innerHTML = `✅ Système opérationnel | 🕐 Prochaine génération automatique dans 4 heures | 📅 Dernière vérification: ${new Date().toLocaleTimeString('fr-FR')}`;
+            } catch (error) {
+                statusElement.innerHTML = `❌ Erreur de statut: ${error.message}`;
+            }
+        }
+        
+        function updateStatistics() {
+            const totalArticles = articles.length;
+            const publishedArticles = articles.filter(a => a.published).length;
+            const pendingArticles = articles.filter(a => !a.published).length;
+            const lastArticle = articles[0];
+            const lastActivity = lastArticle ? formatDate(lastArticle.createdAt) : 'Aucune activité';
+            
+            document.getElementById('totalArticles').textContent = totalArticles;
+            document.getElementById('publishedArticles').textContent = publishedArticles;
+            document.getElementById('pendingArticles').textContent = pendingArticles;
+            document.getElementById('lastActivity').textContent = lastActivity;
+        }
+        
+        async function checkAPIStatus() {
+            const apiStatusElement = document.getElementById('apiStatus');
+            const apis = [{ name: 'Application', url: '/health' }, { name: 'Base de données', url: '/api/articles' }];
+            let statusHTML = '';
+            
+            for (const api of apis) {
+                try {
+                    const response = await fetch(api.url);
+                    statusHTML += `<div class="api-status-item status-online">✅ ${api.name}</div>`;
+                } catch (error) {
+                    statusHTML += `<div class="api-status-item status-offline">❌ ${api.name}</div>`;
+                }
+            }
+            apiStatusElement.innerHTML = statusHTML;
+        }
+        
+        function showMessage(message, type = 'info') {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : type === 'success' ? 'success-message' : 'status-container';
+            messageDiv.innerHTML = message;
+            messagesContainer.appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            if (type !== 'error') {
+                setTimeout(() => { if (messageDiv.parentNode) messageDiv.remove(); }, 10000);
+            }
+        }
+        
+        function clearMessages() { document.getElementById('messagesContainer').innerHTML = ''; }
+        function formatDate(dateString) { const date = new Date(dateString); return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        
+        setInterval(() => { loadArticles(); updateStatistics(); }, 120000);
+        setInterval(() => { checkSystemStatus(); }, 300000);
+    </script>
+</body>
+</html>
